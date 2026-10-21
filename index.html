@@ -8,7 +8,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0b0b0b; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar optimizado para TV Box (D-Pad focus) */
         .sidebar { width: 220px; background: #111; border-right: 1px solid #222; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
         .logo { font-size: 20px; font-weight: bold; color: #e50914; padding: 0 20px 20px 20px; letter-spacing: 0.5px; }
         .menu-section { display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
@@ -16,7 +15,6 @@
         .menu-item:focus, .menu-item:hover, .menu-item.active { background: #e50914; color: #fff; }
         .menu-divider { border: none; border-top: 1px solid #222; margin: 15px 10px; }
 
-        /* Contenido Principal */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .topbar { padding: 15px 25px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; }
         .search-bar { background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 8px 16px; color: #fff; width: 280px; font-size: 13px; outline: none; transition: border-color 0.2s; }
@@ -25,14 +23,12 @@
         .content-scroll { flex: 1; overflow-y: auto; padding: 25px; }
         .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #fff; }
         
-        /* Cuadrícula de elementos */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .card { background: #161616; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; border: 2px solid transparent; outline: none; }
         .card:focus, .card:hover { transform: scale(1.04); border-color: #e50914; box-shadow: 0 6px 16px rgba(229,9,20,0.4); }
         .card-poster { width: 100%; height: 210px; background: #222; object-fit: cover; display: flex; align-items: center; justify-content: center; color: #555; font-size: 12px; }
         .card-title { padding: 10px; font-size: 12px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0b0b0b; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
@@ -175,12 +171,9 @@
                 }
             }
 
-            // Generador masivo de fuentes idéntico al ecosistema de PlayTorrio / Stremio
             function generateMassiveSources(item) {
                 const id = item.id;
                 const isSeries = item.media_type === "tv" || item.name;
-                
-                // Flujo de video real empaquetado compatible con APK / TV Box
                 const activeStream = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4";
 
                 let sources = [
@@ -203,32 +196,29 @@
 
                 return sources;
             }
-
-            // Reproductor integrado adaptado para WebView de Android / TV Box (Corregido)
-            function launchRealPlayer(title, videoUrl, audioOption, subOption) {
+                    function launchRealPlayer(title, videoUrl, audioOption, subOption) {
                 const playerModal = document.createElement("div");
                 playerModal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+                
                 playerModal.innerHTML = `
                     <div style="position:absolute; top:15px; left:20px; z-index:2010; color:#fff; font-size:15px; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.8); pointer-events:none;">
                         ${title} <span style="font-size:11px; color:#aaa; font-weight:normal; margin-left:10px;">[Audio: ${audioOption} | Sub: ${subOption}]</span>
                     </div>
-                    <button id="closePlayer" style="position:absolute; top:15px; right:20px; z-index:2010; background:rgba(0,0,0,0.8); color:#fff; border:1px solid #555; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px; outline:none;" tabindex="0">✕ Salir</button>
-                    <video id="nativeVideoPlayer" controls autoplay playsinline webkit-playsinline style="width:100%; height:100%; object-fit:contain; background:#000;" x5-video-player-type="h5-page">
+                    <button id="closePlayer" style="position:absolute; top:15px; right:20px; z-index:2010; background:rgba(229,9,20,0.9); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px; outline:none;" tabindex="0">✕ Salir</button>
+                    
+                    <div style="position:absolute; bottom:30px; z-index:2015; text-align:center; width:100%;">
+                        <a href="${videoUrl}" target="_blank" style="background:#e50914; color:#fff; padding:10px 20px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:13px; display:inline-block; border:2px solid #fff;" tabindex="0">🔗 Si no reproduce, abrir con Reproductor Externo</a>
+                    </div>
+
+                    <video id="nativeVideoPlayer" controls autoplay playsinline webkit-playsinline crossorigin="anonymous" style="width:100%; height:100%; object-fit:contain; background:#000;">
                         <source src="${videoUrl}" type="video/mp4">
-                        <track kind="subtitles" srclang="es" label="Español" default>
-                        Tu navegador no soporta el reproductor de video.
+                        Tu dispositivo no soporta este formato de video.
                     </video>
                 `;
 
                 document.body.appendChild(playerModal);
                 const videoElement = document.getElementById("nativeVideoPlayer");
                 const closeBtn = document.getElementById("closePlayer");
-
-                if (videoElement.requestFullscreen) {
-                    videoElement.requestFullscreen().catch(() => {});
-                } else if (videoElement.webkitRequestFullscreen) {
-                    videoElement.webkitRequestFullscreen();
-                }
 
                 videoElement.play().catch(() => {
                     videoElement.controls = true;
@@ -239,9 +229,7 @@
                 const closePlayer = () => {
                     try {
                         videoElement.pause();
-                        if (document.fullscreenElement) {
-                            document.exitFullscreen().catch(() => {});
-                        }
+                        videoElement.src = "";
                     } catch (e) {}
                     if (playerModal.parentNode) {
                         document.body.removeChild(playerModal);
@@ -260,7 +248,6 @@
                 });
             }
 
-            // Ventana de detalle con los dos modos de visualización (Cascada Automática y Lista Masiva)
             function openDetail(item) {
                 const title = item.title || item.name || "Sin título";
                 const overview = item.overview || "Sin sinopsis disponible.";
@@ -285,12 +272,10 @@
                         <div style="padding:15px; overflow-y:auto; flex:1;">
                             <p style="font-size:11px; color:#aaa; margin-bottom:12px; line-height:1.3;">${overview}</p>
                             
-                            <!-- Opción 1: Reproducción Rápida Inteligente (Cascada Automática) -->
                             <button id="instantPlayBtn" style="width:100%; background:#e50914; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" tabindex="0">
                                 ⚡ Reproducción Rápida Inteligente (Cascada Automática)
                             </button>
 
-                            <!-- Opción 2: Lista Masiva Manual de Fuentes (Servidores HTTPS / P2P) -->
                             <h3 style="font-size:12px; color:#ccc; margin-bottom:8px; border-top:1px solid #222; padding-top:10px;">Fuentes y Servidores Disponibles (${massiveSources.length} opciones):</h3>
                             <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:12px;">
                                 ${massiveSources.map((src) => `
@@ -301,7 +286,6 @@
                                 `).join("")}
                             </div>
 
-                            <!-- Selector de Subtítulos y Pistas de Audio -->
                             <h3 style="font-size:12px; color:#aaa; margin-bottom:5px;">Ajustes de Pistas y Subtítulos</h3>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
                                 <select id="audioLang" style="background:#1a1a1a; color:#fff; border:1px solid #333; padding:5px; border-radius:6px; font-size:11px;">
