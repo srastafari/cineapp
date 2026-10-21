@@ -1,0 +1,15 @@
+plugins {
+    id 'com.android.application' version '7.4.2'
+}
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.cineapp.tv"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+    }
+}
