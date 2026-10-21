@@ -3,34 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineApp TV Box & Mobile</title>
+    <title>CineApp TV</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #0b0b0b; color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
         .sidebar { width: 220px; background: #111; border-right: 1px solid #222; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
-        .logo { font-size: 20px; font-weight: bold; color: #e50914; padding: 0 20px 20px 20px; letter-spacing: 0.5px; }
+        .logo { font-size: 20px; font-weight: bold; color: #e50914; padding: 0 20px 20px 20px; }
         .menu-section { display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
-        .menu-item { padding: 12px 15px; border-radius: 6px; color: #aaa; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; outline: none; }
+        .menu-item { padding: 12px 15px; border-radius: 6px; color: #aaa; cursor: pointer; font-size: 13px; font-weight: 500; outline: none; border: none; background: transparent; text-align: left; }
         .menu-item:focus, .menu-item:hover, .menu-item.active { background: #e50914; color: #fff; }
         .menu-divider { border: none; border-top: 1px solid #222; margin: 15px 10px; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .topbar { padding: 15px 25px; background: #111; border-bottom: 1px solid #222; display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0; }
-        .search-bar { background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 8px 16px; color: #fff; width: 280px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .search-bar { background: #1a1a1a; border: 1px solid #333; border-radius: 20px; padding: 8px 16px; color: #fff; width: 280px; font-size: 13px; outline: none; }
         .search-bar:focus { border-color: #e50914; }
 
         .content-scroll { flex: 1; overflow-y: auto; padding: 25px; }
         .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #fff; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: #161616; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; border: 2px solid transparent; outline: none; }
-        .card:focus, .card:hover { transform: scale(1.04); border-color: #e50914; box-shadow: 0 6px 16px rgba(229,9,20,0.4); }
+        .card { background: #161616; border-radius: 8px; overflow: hidden; cursor: pointer; border: 2px solid transparent; outline: none; transition: transform 0.2s; }
+        .card:focus, .card:hover { transform: scale(1.04); border-color: #e50914; }
         .card-poster { width: 100%; height: 210px; background: #222; object-fit: cover; display: flex; align-items: center; justify-content: center; color: #555; font-size: 12px; }
         .card-title { padding: 10px; font-size: 12px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0b0b; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
@@ -39,14 +38,14 @@
     <div class="sidebar">
         <div class="logo">CineApp TV</div>
         <div class="menu-section">
-            <div class="menu-item active" tabindex="0">Inicio</div>
-            <div class="menu-item" tabindex="0">Películas</div>
-            <div class="menu-item" tabindex="0">Series</div>
-            <div class="menu-item" tabindex="0">Favoritos</div>
+            <button class="menu-item active" tabindex="0">Inicio</button>
+            <button class="menu-item" tabindex="0">Películas</button>
+            <button class="menu-item" tabindex="0">Series</button>
+            <button class="menu-item" tabindex="0">Favoritos</button>
         </div>
         <hr class="menu-divider">
         <div class="menu-section">
-            <div class="menu-item" tabindex="0">Historial</div>
+            <button class="menu-item" tabindex="0">Historial</button>
         </div>
     </div>
 
@@ -138,7 +137,7 @@
                     const data = await res.json();
                     renderGrid(data.results, "No hay tendencias disponibles");
                 } catch (e) {
-                    resultsGrid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #e50914; padding: 30px;">Error al conectar con el servidor.</div>`;
+                    resultsGrid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #e50914; padding: 30px;">Error al conectar.</div>`;
                 }
             }
 
@@ -172,35 +171,31 @@
             }
             function generateSources(item, season = 1, episode = 1) {
                 const id = item.id;
-                const isSeries = item.media_type === "tv" || item.name;
+                const isSeries = item.media_type === "tv" || item.first_air_date || item.name;
 
                 if (isSeries) {
                     return [
-                        { label: `📺 T${season} E${episode} - Servidor VIP Latino`, url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`, badge: "HD", bg: "#b71c1c" },
-                        { label: `📺 T${season} E${episode} - Servidor V2 Subtitulado`, url: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`, badge: "FHD", bg: "#b71c1c" },
-                        { label: `📺 T${season} E${episode} - Espejo Multi`, url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`, badge: "Multi", bg: "#333" }
+                        { label: `📺 T${season} E${episode} - Opción Principal`, url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`, badge: "HD" },
+                        { label: `📺 T${season} E${episode} - Opción Secundaria`, url: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`, badge: "FHD" }
                     ];
                 } else {
                     return [
-                        { label: "🚀 Servidor Principal VIP (Español Latino)", url: `https://vidsrc.xyz/embed/movie?tmdb=${id}`, badge: "HD", bg: "#e50914" },
-                        { label: "🚀 Servidor V2 (Multiaudio / Sub)", url: `https://vidsrc.me/embed/movie?tmdb=${id}`, badge: "FHD", bg: "#e50914" },
-                        { label: "🌐 Servidor Alternativo VidEmbed", url: `https://vidembed.cc/streaming.php?id=${id}`, badge: "1080p", bg: "#333" },
-                        { label: "⚡ Servidor Espejo SuperEmbed", url: `https://multiembed.mov/?video_id=${id}&tmdb=1`, badge: "Multi", bg: "#555" }
+                        { label: "🚀 Opción Principal (Película HD)", url: `https://vidsrc.xyz/embed/movie?tmdb=${id}`, badge: "HD" },
+                        { label: "🚀 Opción Secundaria", url: `https://vidsrc.me/embed/movie?tmdb=${id}`, badge: "FHD" }
                     ];
                 }
             }
 
-            function launchRealPlayer(title, streamUrl) {
+            function launchPlayer(title, streamUrl) {
                 const playerModal = document.createElement("div");
-                playerModal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+                playerModal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:2000; display:flex; flex-direction:column;";
                 
                 playerModal.innerHTML = `
-                    <div style="position:absolute; top:15px; left:20px; z-index:2010; color:#fff; font-size:15px; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.8); pointer-events:none;">
-                        ${title}
+                    <div style="padding:10px 20px; background:#111; display:flex; justify-content:space-between; align-items:center; z-index:2010;">
+                        <span style="color:#fff; font-size:14px; font-weight:bold;">${title}</span>
+                        <button id="closePlayer" style="background:#e50914; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;" tabindex="0">✕ Salir</button>
                     </div>
-                    <button id="closePlayer" style="position:absolute; top:15px; right:20px; z-index:2010; background:rgba(229,9,20,0.9); color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px; outline:none;" tabindex="0">✕ Salir</button>
-                    
-                    <iframe src="${streamUrl}" style="width:100%; height:100%; border:none; background:#000;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                    <iframe src="${streamUrl}" style="width:100%; height:100%; border:none; background:#000;" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
                 `;
 
                 document.body.appendChild(playerModal);
@@ -208,13 +203,10 @@
                 closeBtn.focus();
 
                 const closePlayer = () => {
-                    if (playerModal.parentNode) {
-                        document.body.removeChild(playerModal);
-                    }
+                    if (playerModal.parentNode) document.body.removeChild(playerModal);
                 };
 
                 closeBtn.addEventListener("click", closePlayer);
-                
                 document.addEventListener("keydown", function closeOnEsc(e) {
                     if (e.key === "Escape" || e.keyCode === 27 || e.keyCode === 4) {
                         e.preventDefault();
@@ -224,11 +216,11 @@
                 });
             }
 
-            async function openDetail(item) {
+            function openDetail(item) {
                 const title = item.title || item.name || "Sin título";
                 const overview = item.overview || "Sin sinopsis disponible.";
                 const poster = item.poster_path ? `${IMG_URL}${item.poster_path}` : "";
-                const isSeries = item.media_type === "tv" || item.name;
+                const isSeries = item.media_type === "tv" || item.first_air_date || item.name;
 
                 history = [item, ...history.filter(h => h.id !== item.id)].slice(0, 20);
                 localStorage.setItem("cineapp_hist", JSON.stringify(history));
@@ -237,65 +229,52 @@
                 let currentEpisode = 1;
 
                 const modal = document.createElement("div");
-                modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; justify-content:center; align-items:center; z-index:1000; padding:15px;";
+                modal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; justify-content:center; align-items:center; z-index:1000; padding:15px;";
                 
                 function updateModalContent() {
                     const sources = generateSources(item, currentSeason, currentEpisode);
 
                     modal.innerHTML = `
-                        <div style="background:#141414; max-width:680px; width:100%; border-radius:10px; overflow:hidden; border:1px solid #333; display:flex; flex-direction:column; max-height:92vh;">
-                            <div style="position:relative; height:150px; background:#000; flex-shrink:0;">
-                                ${poster ? `<img src="${poster}" style="width:100%; height:100%; object-fit:cover; opacity:0.4;" />` : ""}
-                                <div style="position:absolute; bottom:12px; left:15px; right:15px;">
-                                    <h2 style="font-size:16px; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.8);">${title} ${isSeries ? `(T${currentSeason} E${currentEpisode})` : ''}</h2>
+                        <div style="background:#141414; max-width:650px; width:100%; border-radius:8px; overflow:hidden; border:1px solid #333; display:flex; flex-direction:column; max-height:90vh;">
+                            <div style="padding:15px; background:#181818; border-bottom:1px solid #222; display:flex; gap:15px; align-items:center;">
+                                ${poster ? `<img src="${poster}" style="width:70px; height:100px; object-fit:cover; border-radius:4px;" />` : ""}
+                                <div>
+                                    <h2 style="font-size:15px; color:#fff; margin-bottom:5px;">${title} ${isSeries ? `(T${currentSeason} E${currentEpisode})` : ''}</h2>
+                                    <p style="font-size:11px; color:#aaa; line-height:1.2; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${overview}</p>
                                 </div>
                             </div>
                             
                             <div style="padding:15px; overflow-y:auto; flex:1;">
-                                <p style="font-size:11px; color:#aaa; margin-bottom:12px; line-height:1.3;">${overview}</p>
-                                
                                 ${isSeries ? `
-                                    <div style="background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:12px; border:1px solid #333;">
-                                        <h3 style="font-size:12px; color:#fff; margin-bottom:8px;">Seleccionar Temporada y Episodio:</h3>
+                                    <div style="background:#1a1a1a; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #333;">
+                                        <h3 style="font-size:11px; color:#fff; margin-bottom:6px;">Seleccionar Temporada y Episodio:</h3>
                                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                                            <div>
-                                                <label style="font-size:10px; color:#aaa; display:block; margin-bottom:3px;">Temporada:</label>
-                                                <select id="seasonSelect" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:6px; border-radius:6px; font-size:11px;">
-                                                    <option value="1" ${currentSeason == 1 ? 'selected' : ''}>Temporada 1</option>
-                                                    <option value="2" ${currentSeason == 2 ? 'selected' : ''}>Temporada 2</option>
-                                                    <option value="3" ${currentSeason == 3 ? 'selected' : ''}>Temporada 3</option>
-                                                    <option value="4" ${currentSeason == 4 ? 'selected' : ''}>Temporada 4</option>
-                                                    <option value="5" ${currentSeason == 5 ? 'selected' : ''}>Temporada 5</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label style="font-size:10px; color:#aaa; display:block; margin-bottom:3px;">Episodio:</label>
-                                                <select id="episodeSelect" style="width:100%; background:#111; color:#fff; border:1px solid #444; padding:6px; border-radius:6px; font-size:11px;">
-                                                    ${Array.from({length: 25}, (_, i) => `<option value="${i+1}" ${currentEpisode == i+1 ? 'selected' : ''}>Episodio ${i+1}</option>`).join('')}
-                                                </select>
-                                            </div>
+                                            <select id="seasonSelect" style="background:#111; color:#fff; border:1px solid #444; padding:6px; border-radius:4px; font-size:11px;">
+                                                <option value="1" ${currentSeason == 1 ? 'selected' : ''}>Temporada 1</option>
+                                                <option value="2" ${currentSeason == 2 ? 'selected' : ''}>Temporada 2</option>
+                                                <option value="3" ${currentSeason == 3 ? 'selected' : ''}>Temporada 3</option>
+                                            </select>
+                                            <select id="episodeSelect" style="background:#111; color:#fff; border:1px solid #444; padding:6px; border-radius:4px; font-size:11px;">
+                                                ${Array.from({length: 20}, (_, i) => `<option value="${i+1}" ${currentEpisode == i+1 ? 'selected' : ''}>Episodio ${i+1}</option>`).join('')}
+                                            </select>
                                         </div>
                                     </div>
                                 ` : ''}
 
-                                <button id="instantPlayBtn" style="width:100%; background:#e50914; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" tabindex="0">
-                                    ⚡ Reproducción Inmediata (Servidor Principal)
-                                </button>
-
-                                <h3 style="font-size:12px; color:#ccc; margin-bottom:8px; border-top:1px solid #222; padding-top:10px;">Fuentes y Servidores Disponibles:</h3>
-                                <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:12px;">
+                                <h3 style="font-size:11px; color:#aaa; margin-bottom:6px;">Opciones de Reproducción:</h3>
+                                <div style="display:flex; flex-direction:column; gap:6px;">
                                     ${sources.map((src) => `
-                                        <button class="source-btn" data-url="${src.url}" data-label="${src.label}" style="background:#1a1a1a; color:#fff; border:1px solid #333; padding:7px 10px; border-radius:6px; text-align:left; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:11px;" tabindex="0">
-                                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:10px; max-width:420px;">${src.label}</span>
-                                            <span style="font-size:9px; background:${src.bg}; padding:2px 5px; border-radius:4px; flex-shrink:0;">${src.badge}</span>
+                                        <button class="source-btn" data-url="${src.url}" style="background:#1a1a1a; color:#fff; border:1px solid #333; padding:10px; border-radius:6px; text-align:left; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:11px;" tabindex="0">
+                                            <span>${src.label}</span>
+                                            <span style="font-size:9px; background:#e50914; padding:2px 6px; border-radius:3px;">${src.badge}</span>
                                         </button>
                                     `).join("")}
                                 </div>
                             </div>
 
-                            <div style="padding:10px 15px; display:flex; gap:10px; background:#111; border-top:1px solid #222; flex-shrink:0;">
-                                <button id="favBtn" style="background:#222; color:#fff; border:none; padding:7px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:11px;" tabindex="0">❤️ Favorito</button>
-                                <button id="closeBtn" style="background:#222; color:#aaa; border:none; padding:7px 12px; border-radius:6px; cursor:pointer; font-size:11px; margin-left:auto;" tabindex="0">Cerrar</button>
+                            <div style="padding:10px 15px; display:flex; gap:10px; background:#111; border-top:1px solid #222;">
+                                <button id="favBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:11px;" tabindex="0">❤️ Favorito</button>
+                                <button id="closeBtn" style="background:#222; color:#aaa; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:11px; margin-left:auto;" tabindex="0">Cerrar</button>
                             </div>
                         </div>
                     `;
@@ -311,18 +290,11 @@
                         });
                     }
 
-                    document.getElementById("instantPlayBtn").addEventListener("click", () => {
-                        const activeSources = generateSources(item, currentSeason, currentEpisode);
-                        document.body.removeChild(modal);
-                        launchRealPlayer(`${title} ${isSeries ? `[T${currentSeason} E${currentEpisode}]` : ''}`, activeSources[0].url);
-                    });
-
                     document.querySelectorAll(".source-btn").forEach(btn => {
                         btn.addEventListener("click", () => {
                             const url = btn.getAttribute("data-url");
-                            const label = btn.getAttribute("data-label");
                             document.body.removeChild(modal);
-                            launchRealPlayer(`${title} - ${label}`, url);
+                            launchPlayer(title, url);
                         });
                     });
 
@@ -341,9 +313,7 @@
                     });
                 }
 
-                if (!document.body.contains(modal)) {
-                    document.body.appendChild(modal);
-                }
+                if (!document.body.contains(modal)) document.body.appendChild(modal);
                 updateModalContent();
             }
 
@@ -351,9 +321,7 @@
             searchInput.addEventListener("input", (e) => {
                 clearTimeout(timeout);
                 const query = e.target.value;
-                timeout = setTimeout(() => {
-                    searchMovies(query);
-                }, 400);
+                timeout = setTimeout(() => searchMovies(query), 400);
             });
 
             loadTrending();
