@@ -299,4 +299,46 @@
                     const audio = document.getElementById("audioLang").value;
                     const subs = document.getElementById("subLang").value;
                     document.body.removeChild(modal);
-  
+                    launchRealPlayer(title, massiveSources[0].url, audio, subs);
+                });
+
+                document.querySelectorAll(".source-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const url = btn.getAttribute("data-url");
+                        const label = btn.getAttribute("data-label");
+                        const audio = document.getElementById("audioLang").value;
+                        const subs = document.getElementById("subLang").value;
+                        document.body.removeChild(modal);
+                        launchRealPlayer(`${title} - ${label}`, url, audio, subs);
+                    });
+                });
+
+                document.getElementById("favBtn").addEventListener("click", () => {
+                    if (!favorites.some(f => f.id === item.id)) {
+                        favorites.push(item);
+                        localStorage.setItem("cineapp_favs", JSON.stringify(favorites));
+                        alert("Añadido a Favoritos");
+                    } else {
+                        alert("Ya está en Favoritos");
+                    }
+                });
+
+                document.getElementById("closeBtn").addEventListener("click", () => {
+                    document.body.removeChild(modal);
+                });
+            }
+
+            let timeout = null;
+            searchInput.addEventListener("input", (e) => {
+                clearTimeout(timeout);
+                const query = e.target.value;
+                timeout = setTimeout(() => {
+                    searchMovies(query);
+                }, 400);
+            });
+
+            loadTrending();
+        });
+    </script>
+</body>
+</html>
