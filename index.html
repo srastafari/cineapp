@@ -204,16 +204,16 @@
                 return sources;
             }
 
-            // Reproductor integrado a pantalla completa con soporte de subtítulos y pistas
+            // Reproductor integrado adaptado para WebView de Android / TV Box (Corregido)
             function launchRealPlayer(title, videoUrl, audioOption, subOption) {
                 const playerModal = document.createElement("div");
-                playerModal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center;";
+                playerModal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:2000; display:flex; flex-direction:column; justify-content:center; align-items:center;";
                 playerModal.innerHTML = `
-                    <div style="position:absolute; top:15px; left:20px; z-index:2010; color:#fff; font-size:15px; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
+                    <div style="position:absolute; top:15px; left:20px; z-index:2010; color:#fff; font-size:15px; font-weight:bold; text-shadow:0 2px 4px rgba(0,0,0,0.8); pointer-events:none;">
                         ${title} <span style="font-size:11px; color:#aaa; font-weight:normal; margin-left:10px;">[Audio: ${audioOption} | Sub: ${subOption}]</span>
                     </div>
-                    <button id="closePlayer" style="position:absolute; top:15px; right:20px; z-index:2010; background:rgba(0,0,0,0.6); color:#fff; border:1px solid #444; padding:6px 14px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;" tabindex="0">✕ Salir</button>
-                    <video id="nativeVideoPlayer" controls autoplay playsinline style="width:100%; height:100%; background:#000;">
+                    <button id="closePlayer" style="position:absolute; top:15px; right:20px; z-index:2010; background:rgba(0,0,0,0.8); color:#fff; border:1px solid #555; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px; outline:none;" tabindex="0">✕ Salir</button>
+                    <video id="nativeVideoPlayer" controls autoplay playsinline webkit-playsinline style="width:100%; height:100%; object-fit:contain; background:#000;" x5-video-player-type="h5-page">
                         <source src="${videoUrl}" type="video/mp4">
                         <track kind="subtitles" srclang="es" label="Español" default>
                         Tu navegador no soporta el reproductor de video.
@@ -222,12 +222,41 @@
 
                 document.body.appendChild(playerModal);
                 const videoElement = document.getElementById("nativeVideoPlayer");
-                
-                videoElement.play().catch(() => {});
+                const closeBtn = document.getElementById("closePlayer");
 
-                document.getElementById("closePlayer").addEventListener("click", () => {
-                    videoElement.pause();
-                    document.body.removeChild(playerModal);
+                if (videoElement.requestFullscreen) {
+                    videoElement.requestFullscreen().catch(() => {});
+                } else if (videoElement.webkitRequestFullscreen) {
+                    videoElement.webkitRequestFullscreen();
+                }
+
+                videoElement.play().catch(() => {
+                    videoElement.controls = true;
+                });
+
+                closeBtn.focus();
+
+                const closePlayer = () => {
+                    try {
+                        videoElement.pause();
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen().catch(() => {});
+                        }
+                    } catch (e) {}
+                    if (playerModal.parentNode) {
+                        document.body.removeChild(playerModal);
+                    }
+                };
+
+                closeBtn.addEventListener("click", closePlayer);
+                videoElement.addEventListener("ended", closePlayer);
+                
+                document.addEventListener("keydown", function closeOnEsc(e) {
+                    if (e.key === "Escape" || e.keyCode === 27 || e.keyCode === 4) {
+                        e.preventDefault();
+                        closePlayer();
+                        document.removeEventListener("keydown", closeOnEsc);
+                    }
                 });
             }
 
